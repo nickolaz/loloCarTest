@@ -19,7 +19,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-
+import axios from 'axios';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 const App = () => {
@@ -29,6 +29,29 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
   const [input, setInput] = useState('');
+  const [age, setAge] = useState('');
+
+  interface AgifyResponse {
+    age: null;
+    count: number;
+    name: string;
+  }
+
+  const getAge = async () => {
+    const urlBase = 'https://api.agify.io/?name=';
+    try {
+      const response = await axios.get<AgifyResponse>(urlBase + input);
+      if (response && response.status === 200) {
+        if (response.data.age !== null) {
+          setAge(response.data.age);
+        } else {
+          setAge('0');
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -51,13 +74,17 @@ const App = () => {
               value={input}
               onChangeText={e => {
                 setInput(e);
+                getAge();
               }}
               style={{backgroundColor: 'gray', color: 'white'}}
             />
           </View>
           {input.length > 3 && (
             <View style={{paddingVertical: 10}}>
-              <Text style={styles.bodyTitle}>{`Hola,${input}!`}</Text>
+              <Text
+                style={
+                  styles.bodyTitle
+                }>{`Hola,${input}!\nTu nombre tiene ${age} años de edad`}</Text>
             </View>
           )}
         </View>
